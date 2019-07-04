@@ -27,7 +27,8 @@
     "sinon": "^7.3.2"
   },
   "files": [
-    "lib/"
+    "lib/",
+    "src"
   ],
   "directories": {
     "test": "tests"
