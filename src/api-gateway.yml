@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Stack para la creación de los endpoints de API Gateway.'
+
+Metadata:
+
+  Naming-conventions: 'Los stacks creados con este template deben tener el siguiente patrón de nombre: Janis{ServiceName}{Environment}ApiEndpoints, por ejemplo JanisSacBetaApiEndpoints'
+
+  AWS::CloudFormation::Interface:
+
+    ParameterGroups:
+      - Label:
+          default: Parametros de API
+        Parameters:
+          - ApiGatewayStackName
+          - TargetDomain
+
+Parameters:
+
+  TargetDomain:
+    Type: String
+    Description: 'El dominio (con protocolo http/https) al cual redirigirán los llamados de API. Sin barra al final! Por ejemplo: https://sac-internal.janis.in'
+
+  ApiGatewayStackName:
+    Type: String
+    Description: 'El nombre del Stack que implementa la base de API Gateway'
+
+Resources:
+
+  ApiGatewayDeployment:
+    DependsOn: ApiGatewayMethodAwsHealthcheck
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: Implementación actual
+      RestApiId:
+        Fn::ImportValue:
+          !Sub '${ApiGatewayStackName}-ApiGatewayId'
+      StageName: Production
+
+  ApiGatewayResourceAws:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::ImportValue:
+          !Sub '${ApiGatewayStackName}-ApiGatewayRootResourceId'
+      PathPart: aws
+      RestApiId:
+        Fn::ImportValue:
+          !Sub '${ApiGatewayStackName}-ApiGatewayId'
+
+  ApiGatewayResourceAwsHealthcheck:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewayResourceAws
+      PathPart: healthcheck
+      RestApiId:
+        Fn::ImportValue:
+          !Sub '${ApiGatewayStackName}-ApiGatewayId'
+
+  ApiGatewayMethodAwsHealthcheck:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: GET
+        Type: HTTP_PROXY
+        Uri: !Sub ${TargetDomain}/aws/healthcheck
+      ResourceId: !Ref ApiGatewayResourceAwsHealthcheck
+      RestApiId:
+        Fn::ImportValue:
+          !Sub '${ApiGatewayStackName}-ApiGatewayId'
