@@ -45,7 +45,7 @@ const buildParameters = (parameters, target) => {
 		formattedParameters[parameterKey] = parameterValue;
 	}
 
-	return `RequestParameters: ${JSON.stringify(formattedParameters)}`;
+	return JSON.stringify(formattedParameters);
 };
 
 module.exports = ({
@@ -55,7 +55,35 @@ module.exports = ({
 	needsAuthentication,
 	resourceName,
 	parameters
-}) => `
+}) => {
+	const methodTemplate = {};
+
+	methodTemplate[methodName] = {
+		Type: 'AWS::ApiGateway::Method',
+		Properties: {
+			ApiKeyRequired: needsAuthentication ? 'true' : 'false',
+			HttpMethod: httpMethod.toUpperCase(),
+			AuthorizationType: 'NONE',
+			Integration: {
+				IntegrationHttpMethod: httpMethod.toUpperCase(),
+				Type: 'HTTP_PROXY',
+				Uri: `!Sub \${TargetDomain}/api${apiPath}`,
+				RequestParameters: buildParameters(parameters, 'integration')
+			},
+			ResourceId: `!Ref ${resourceName}`,
+			RestApiID: {
+				'Fn::ImportValue': `
+          !Sub '\${ApiGatewayStackName}-ApiGatewayId'`
+			},
+			RequestParameters: buildParameters(parameters, 'request')
+		}
+	};
+
+	return methodTemplate;
+};
+
+/**
+ * `
   ${methodName}:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -73,3 +101,4 @@ module.exports = ({
           !Sub '\${ApiGatewayStackName}-ApiGatewayId'
       ${buildParameters(parameters, 'request')}
 `;
+ */
