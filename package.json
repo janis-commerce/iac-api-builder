@@ -32,5 +32,8 @@
   ],
   "directories": {
     "test": "tests"
+  },
+  "dependencies": {
+    "yaml": "^1.6.0"
   }
 }
