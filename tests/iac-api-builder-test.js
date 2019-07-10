@@ -7,6 +7,93 @@ const fs = require('fs');
 
 const { IacApiBuilder } = require('./../lib');
 
+const fakePaths = {
+	paths: {
+		'local/': {
+			get: {
+				responses: {
+					200: {
+						description: 'Ok'
+					},
+					400: {
+						description: 'Invalid data'
+					}
+				}
+			}
+		},
+		'local/id': {
+			'x-janis-allow-cors': true,
+			get: {
+				security: [true],
+				parameters: [{
+					in: 'path',
+					name: 'id',
+					description: 'Request id'
+				}],
+				responses: {
+					200: {
+						description: '12'
+					},
+					400: {
+						description: 'Invalid data'
+					},
+					404: {
+						description: 'Not Found'
+					}
+				}
+			},
+			post: {
+				parameters: [{
+					in: 'body',
+					name: 'payload',
+					description: 'Request payload',
+					schema: {
+						$ref: '#/definitions/payload'
+					}
+				}],
+				responses: {
+					200: {
+						description: 'Ok'
+					},
+					400: {
+						description: 'Invalid data'
+					}
+				}
+			},
+			put: {
+				responses: {
+					200: {
+						description: 'Ok'
+					},
+					400: {
+						description: 'Invalid data'
+					}
+				}
+			},
+			patch: {
+				responses: {
+					200: {
+						description: 'Ok'
+					},
+					400: {
+						description: 'Invalid data'
+					}
+				}
+			},
+			delete: {
+				responses: {
+					200: {
+						description: 'Ok'
+					},
+					400: {
+						description: 'Invalid data'
+					}
+				}
+			}
+		}
+	}
+};
+
 describe('IacApiBuilder', () => {
 
 	const builder = new IacApiBuilder();
@@ -80,7 +167,7 @@ describe('IacApiBuilder', () => {
 			builderMock.verify();
 		});
 
-		it('should init but can\'t build', async () => {
+		it('should init but can\'t build because no paths', async () => {
 
 			builderMock.expects('getSchemasJSON')
 				.once()
@@ -103,6 +190,60 @@ describe('IacApiBuilder', () => {
 			fsMock.expects('appendFile').never();
 			// Never try to build
 			builderMock.expects('buildPath').never();
+
+			await builder.build();
+
+			fsMock.verify();
+			builderMock.verify();
+
+		});
+
+		it('should init but can\'t build File-system failed to append', async () => {
+
+			builderMock.expects('getSchemasJSON')
+				.once()
+				.returns(fakePaths);
+
+			// Calls to create the file but rejects
+			fsMock.expects('stat')
+				.once()
+				.withArgs(IacApiBuilder.schemasJSON)
+				.returns();
+
+			fsMock.expects('copyFile')
+				.once()
+				.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
+				.returns();
+
+			fsMock.expects('appendFile').atLeast(1)
+				.rejects(new Error('Failed to Append'));
+
+			await builder.build();
+
+			fsMock.verify();
+			builderMock.verify();
+
+		});
+
+		it('should build', async () => {
+
+			builderMock.expects('getSchemasJSON')
+				.once()
+				.returns(fakePaths);
+
+			// Calls to create the file but rejects
+			fsMock.expects('stat')
+				.once()
+				.withArgs(IacApiBuilder.schemasJSON)
+				.returns();
+
+			fsMock.expects('copyFile')
+				.once()
+				.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
+				.returns();
+
+			fsMock.expects('appendFile').atLeast(1)
+				.returns();
 
 			await builder.build();
 
