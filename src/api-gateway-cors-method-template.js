@@ -55,5 +55,7 @@ module.exports = ({
 		}
 	};
 
+	return corsTemplate
+
 };
 /* eslint-enable */

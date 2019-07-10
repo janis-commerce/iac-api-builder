@@ -12,20 +12,21 @@ const getParameterLocation = schemaLocation => {
 
 const buildParameter = (parameter, target) => {
 
-	switch(target) {
-		case 'request':
-			return [
-				`method.request.${getParameterLocation(parameter.in)}.${parameter.name}`,
-				parameter.required || false
-			];
-		case 'integration':
-			return [
-				`integration.request.${getParameterLocation(parameter.in)}.${parameter.name}`,
-				`method.request.${getParameterLocation(parameter.in)}.${parameter.name}`
-			];
-		default:
-			return [];
+	if(target === 'request') {
+		return [
+			`method.request.${getParameterLocation(parameter.in)}.${parameter.name}`,
+			parameter.required || false
+		];
 	}
+
+	if(target === 'integration') {
+		return [
+			`integration.request.${getParameterLocation(parameter.in)}.${parameter.name}`,
+			`method.request.${getParameterLocation(parameter.in)}.${parameter.name}`
+		];
+	}
+
+	// return [];
 
 };
 
