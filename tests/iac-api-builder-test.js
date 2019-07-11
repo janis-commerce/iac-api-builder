@@ -94,6 +94,10 @@ const fakePaths = {
 	}
 };
 
+const failPath = {
+	paths: {}
+};
+
 describe('IacApiBuilder', () => {
 
 	const builder = new IacApiBuilder();
@@ -114,143 +118,194 @@ describe('IacApiBuilder', () => {
 
 		it('should not build but not rejects', async () => {
 
-			// Don't Copy the source template, neither append nothing
+			// Try to find the file but can't find it.
+			fsMock.expects('stat')
+				.once()
+				.withArgs(IacApiBuilder.schemasJSON)
+				.rejects(new Error('File Not Found.'));
+
+			// Don't Copy the source template, neither append nothing or try to read JSON file
+			fsMock.expects('readFile').never();
 			fsMock.expects('copyFile').never();
 			fsMock.expects('appendFile').never();
 
 			await assert.doesNotReject(builder.build());
+
+			fsMock.verify();
 		});
 	});
 
 	context('when API-Schemas file exist', () => {
 		let builderMock;
 
-		beforeEach(() => {
-			/* sandbox.stub(console, 'log');
-			sandbox.stub(console, 'error'); */
+		context('when file-system fails', () => {
 
-			fsMock = sandbox.mock(fs);
-			builderMock = sandbox.mock(builder);
+			beforeEach(() => {
+				sandbox.stub(console, 'log');
+				sandbox.stub(console, 'error');
+
+				fsMock = sandbox.mock(fs);
+				builderMock = sandbox.mock(builder);
+			});
+
+			afterEach(() => {
+				sandbox.restore();
+			});
+
+			it('should not init but can\'t copy', async () => {
+
+				fsMock.expects('stat')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns();
+				// G
+				fsMock.expects('readFile')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns(JSON.stringify(failPath));
+
+				// Calls to create the file but rejects
+				fsMock.expects('copyFile')
+					.once()
+					.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
+					.rejects(new Error('Error can\'t copy file'));
+
+				// Never calls Append
+				fsMock.expects('appendFile').never();
+				// Never try to build
+				builderMock.expects('buildPath').never();
+
+				await builder.build();
+
+				fsMock.verify();
+				builderMock.verify();
+			});
+
+			it('should init but fails to append', async () => {
+
+				// Calls to create the file but rejects
+				fsMock.expects('stat')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns();
+
+				fsMock.expects('readFile')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns(JSON.stringify(fakePaths));
+
+				fsMock.expects('copyFile')
+					.once()
+					.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
+					.returns();
+
+				fsMock.expects('appendFile').atLeast(1)
+					.rejects(new Error('Failed to Append'));
+
+				await builder.build();
+
+				fsMock.verify();
+				// builderMock.verify();
+
+			});
 		});
 
-		afterEach(() => {
-			sandbox.restore();
+		context('when file-system works', () => {
+			beforeEach(() => {
+				sandbox.stub(console, 'log');
+				sandbox.stub(console, 'error');
+
+				fsMock = sandbox.mock(fs);
+				builderMock = sandbox.mock(builder);
+			});
+
+			afterEach(() => {
+				sandbox.restore();
+			});
+
+			it('should not init if schema file is invalid json', async () => {
+
+				fsMock.expects('stat')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns();
+
+				fsMock.expects('readFile')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns();
+
+				// Never try to Copy
+				fsMock.expects('copyFile').never();
+
+				// Never try to Append
+				fsMock.expects('appendFile').never();
+				// Never try to build
+				builderMock.expects('buildPath').never();
+
+				await builder.build();
+
+				fsMock.verify();
+				builderMock.verify();
+			});
+
+			it('should init but can\'t build because no paths', async () => {
+
+				fsMock.expects('stat')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns();
+
+				// Read a JSON without "paths"
+				fsMock.expects('readFile')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns(JSON.stringify({}));
+
+				fsMock.expects('copyFile')
+					.once()
+					.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
+					.returns();
+
+				// Never calls Append
+				fsMock.expects('appendFile').never();
+				// Never try to build
+				builderMock.expects('buildPath').never();
+
+				await builder.build();
+
+				fsMock.verify();
+				builderMock.verify();
+
+			});
+
+			it('should build', async () => {
+
+				fsMock.expects('stat')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns();
+
+				fsMock.expects('readFile')
+					.once()
+					.withArgs(IacApiBuilder.schemasJSON)
+					.returns(JSON.stringify(fakePaths));
+
+				fsMock.expects('copyFile')
+					.once()
+					.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
+					.returns();
+
+				fsMock.expects('appendFile').atLeast(1)
+					.returns();
+
+				await builder.build();
+
+				fsMock.verify();
+
+			});
 		});
 
-		it('should not init if file-system can not do it', async () => {
-
-			builderMock.expects('getSchemasJSON')
-				.once()
-				.returns({
-					paths: {}
-				});
-
-			fsMock.expects('stat')
-				.once()
-				.withArgs(IacApiBuilder.schemasJSON)
-				.returns();
-
-			// Calls to create the file but rejects
-			fsMock.expects('copyFile')
-				.once()
-				.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
-				.rejects(new Error('Bad Write Permissions'));
-
-			// Never calls Append
-			fsMock.expects('appendFile').never();
-			// Never try to build
-			builderMock.expects('buildPath').never();
-
-			await builder.build();
-
-			fsMock.verify();
-			builderMock.verify();
-		});
-
-		it('should init but can\'t build because no paths', async () => {
-
-			builderMock.expects('getSchemasJSON')
-				.once()
-				.returns({
-					paths: {}
-				});
-
-			// Calls to create the file but rejects
-			fsMock.expects('stat')
-				.once()
-				.withArgs(IacApiBuilder.schemasJSON)
-				.returns();
-
-			fsMock.expects('copyFile')
-				.once()
-				.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
-				.returns();
-
-			// Never calls Append
-			fsMock.expects('appendFile').never();
-			// Never try to build
-			builderMock.expects('buildPath').never();
-
-			await builder.build();
-
-			fsMock.verify();
-			builderMock.verify();
-
-		});
-
-		it('should init but can\'t build File-system failed to append', async () => {
-
-			builderMock.expects('getSchemasJSON')
-				.once()
-				.returns(fakePaths);
-
-			// Calls to create the file but rejects
-			fsMock.expects('stat')
-				.once()
-				.withArgs(IacApiBuilder.schemasJSON)
-				.returns();
-
-			fsMock.expects('copyFile')
-				.once()
-				.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
-				.returns();
-
-			fsMock.expects('appendFile').atLeast(1)
-				.rejects(new Error('Failed to Append'));
-
-			await builder.build();
-
-			fsMock.verify();
-			builderMock.verify();
-
-		});
-
-		it('should build', async () => {
-
-			builderMock.expects('getSchemasJSON')
-				.once()
-				.returns(fakePaths);
-
-			// Calls to create the file but rejects
-			fsMock.expects('stat')
-				.once()
-				.withArgs(IacApiBuilder.schemasJSON)
-				.returns();
-
-			fsMock.expects('copyFile')
-				.once()
-				.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
-				.returns();
-
-			fsMock.expects('appendFile').atLeast(1)
-				.returns();
-
-			await builder.build();
-
-			fsMock.verify();
-			builderMock.verify();
-
-		});
 	});
 
 });
