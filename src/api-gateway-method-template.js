@@ -12,21 +12,18 @@ const getParameterLocation = schemaLocation => {
 
 const buildParameter = (parameter, target) => {
 
-	if(target === 'request') {
-		return [
+	const request = {
+		request: [
 			`method.request.${getParameterLocation(parameter.in)}.${parameter.name}`,
 			parameter.required || false
-		];
-	}
-
-	if(target === 'integration') {
-		return [
+		],
+		integration: [
 			`integration.request.${getParameterLocation(parameter.in)}.${parameter.name}`,
 			`method.request.${getParameterLocation(parameter.in)}.${parameter.name}`
-		];
-	}
+		]
+	};
 
-	// return [];
+	return request[target];
 
 };
 
@@ -82,24 +79,3 @@ module.exports = ({
 
 	return methodTemplate;
 };
-
-/**
- * `
-  ${methodName}:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      ApiKeyRequired: ${needsAuthentication ? 'true' : 'false'}
-      HttpMethod: ${httpMethod.toUpperCase()}
-      AuthorizationType: NONE
-      Integration:
-        IntegrationHttpMethod: ${httpMethod.toUpperCase()}
-        Type: HTTP_PROXY
-        Uri: !Sub \${TargetDomain}/api${apiPath}
-        ${buildParameters(parameters, 'integration')}
-      ResourceId: !Ref ${resourceName}
-      RestApiId:
-        Fn::ImportValue:
-          !Sub '\${ApiGatewayStackName}-ApiGatewayId'
-      ${buildParameters(parameters, 'request')}
-`;
- */
