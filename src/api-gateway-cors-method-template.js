@@ -2,7 +2,6 @@
 
 // IMPORTANTE: Mantener los espacios, nuevas líneas e indentación para no romper el formato yaml
 
-/* eslint-disable*/
 module.exports = ({
 	methodName,
 	resourceName,
@@ -10,7 +9,7 @@ module.exports = ({
 }) => {
 
 	const corsTemplate = {};
-
+	/* eslint-disable*/
 	corsTemplate[methodName] = {
 		Type: 'AWS::ApiGateway::Method',
 		Properties: {
@@ -49,13 +48,11 @@ module.exports = ({
 			}],
 			ResourceId: `!Ref ${resourceName}`,
 			RestApiId: {
-				'Fn::ImportValue': `
-        !Sub '\${ApiGatewayStackName}-ApiGatewayId'`
+				'Fn::ImportValue': `!Sub '\${ApiGatewayStackName}-ApiGatewayId'`
 			}
 		}
 	};
-
-	return corsTemplate
+	/* eslint-enable */
+	return corsTemplate;
 
 };
-/* eslint-enable */

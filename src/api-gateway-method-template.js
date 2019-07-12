@@ -42,7 +42,7 @@ const buildParameters = (parameters, target) => {
 		const [parameterKey, parameterValue] = buildParameter(parameter, target);
 		formattedParameters[parameterKey] = parameterValue;
 	}
-
+	console.log(JSON.stringify(formattedParameters));
 	return JSON.stringify(formattedParameters);
 };
 
@@ -55,7 +55,7 @@ module.exports = ({
 	parameters
 }) => {
 	const methodTemplate = {};
-
+	/* eslint-disable*/
 	methodTemplate[methodName] = {
 		Type: 'AWS::ApiGateway::Method',
 		Properties: {
@@ -65,17 +65,20 @@ module.exports = ({
 			Integration: {
 				IntegrationHttpMethod: httpMethod.toUpperCase(),
 				Type: 'HTTP_PROXY',
-				Uri: `!Sub \${TargetDomain}/api${apiPath}`,
-				RequestParameters: buildParameters(parameters, 'integration')
+				Uri: `\n!Sub '\${TargetDomain}/api${apiPath}'`
 			},
-			ResourceId: `!Ref ${resourceName}`,
+			ResourceId: `\n!Ref ${resourceName}`,
 			RestApiID: {
-				'Fn::ImportValue': `
-          !Sub '\${ApiGatewayStackName}-ApiGatewayId'`
-			},
-			RequestParameters: buildParameters(parameters, 'request')
+				'Fn::ImportValue': `\n!Sub '\${ApiGatewayStackName}-ApiGatewayId'`
+			}
 		}
 	};
+	/* eslint-enable */
+	if(buildParameters(parameters, 'integration'))
+		methodTemplate[methodName].Properties.Integration.RequestParameters = `\n${buildParameters(parameters, 'integration')}`;
+
+	if(buildParameters(parameters, 'request'))
+		methodTemplate[methodName].Properties.RequestParameters = `\n${buildParameters(parameters, 'request')}`;
 
 	return methodTemplate;
 };

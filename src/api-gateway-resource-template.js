@@ -6,13 +6,12 @@ module.exports = ({
 	resourcePathPart
 }) => {
 	const resourceTemplate = {};
-
+	/* eslint-disable*/
 	const importValue = {
-		'Fn::ImportValue': `
-		!Sub! '\${ApiGatewayStackName}-ApiGatewayRootResourceId'`
+		'Fn::ImportValue': `\n!Sub '\${ApiGatewayStackName}-ApiGatewayRootResourceId'`
 	};
 
-	const ref = `!Ref ${parentResourceName}`;
+	const ref = `\n!Ref ${parentResourceName}`;
 
 	const ParentId = parentResourceName ? ref : importValue;
 
@@ -22,11 +21,10 @@ module.exports = ({
 			ParentId,
 			PathPart: resourcePathPart,
 			RestApiId: {
-				'Fn::ImportValue': `
-				!Sub '\${ApiGatewayStackName}-ApiGatewayId'`
+				'Fn::ImportValue': `\n!Sub '\${ApiGatewayStackName}-ApiGatewayId'`
 			}
 		}
 	};
-
+	/* eslint-enable */
 	return resourceTemplate;
 };
