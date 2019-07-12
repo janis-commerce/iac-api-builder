@@ -165,8 +165,13 @@ describe('IacApiBuilder', () => {
 					.returns(JSON.stringify(failPath));
 
 				// Calls to create the file but rejects
-				fsMock.expects('copyFile')
+				fsMock.expects('mkdir')
 					.once()
+					.withArgs(IacApiBuilder.buildDirectory, { recursive: true })
+					.rejects(new Error('Error can\'t create directory'));
+
+				fsMock.expects('copyFile')
+					.never()
 					.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
 					.rejects(new Error('Error can\'t copy file'));
 
@@ -193,6 +198,11 @@ describe('IacApiBuilder', () => {
 					.once()
 					.withArgs(IacApiBuilder.schemasJSON)
 					.returns(JSON.stringify(fakePaths));
+
+				fsMock.expects('mkdir')
+					.once()
+					.withArgs(IacApiBuilder.buildDirectory, { recursive: true })
+					.returns();
 
 				fsMock.expects('copyFile')
 					.once()
@@ -261,6 +271,11 @@ describe('IacApiBuilder', () => {
 					.withArgs(IacApiBuilder.schemasJSON)
 					.returns(JSON.stringify({}));
 
+				fsMock.expects('mkdir')
+					.once()
+					.withArgs(IacApiBuilder.buildDirectory, { recursive: true })
+					.returns();
+
 				fsMock.expects('copyFile')
 					.once()
 					.withArgs(IacApiBuilder.sourceFilePath, IacApiBuilder.buildFilePath)
@@ -289,6 +304,11 @@ describe('IacApiBuilder', () => {
 					.once()
 					.withArgs(IacApiBuilder.schemasJSON)
 					.returns(JSON.stringify(fakePaths));
+
+				fsMock.expects('mkdir')
+					.once()
+					.withArgs(IacApiBuilder.buildDirectory, { recursive: true })
+					.returns();
 
 				fsMock.expects('copyFile')
 					.once()
