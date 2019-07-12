@@ -42,7 +42,7 @@ const buildParameters = (parameters, target) => {
 		const [parameterKey, parameterValue] = buildParameter(parameter, target);
 		formattedParameters[parameterKey] = parameterValue;
 	}
-	console.log(JSON.stringify(formattedParameters));
+
 	return JSON.stringify(formattedParameters);
 };
 
