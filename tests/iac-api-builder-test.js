@@ -158,7 +158,7 @@ describe('IacApiBuilder', () => {
 					.once()
 					.withArgs(IacApiBuilder.schemasJSON)
 					.returns();
-				// G
+
 				fsMock.expects('readFile')
 					.once()
 					.withArgs(IacApiBuilder.schemasJSON)
@@ -205,7 +205,6 @@ describe('IacApiBuilder', () => {
 				await builder.build();
 
 				fsMock.verify();
-				// builderMock.verify();
 
 			});
 		});
