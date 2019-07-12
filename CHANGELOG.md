@@ -9,3 +9,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - `iacApiBuilder` added
 - `npx` added
+- *Unit Test* added
+- Templates Objects added
