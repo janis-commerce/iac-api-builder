@@ -12,11 +12,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https:/github.com/janis-commerce/iac-api-builder.git"
+    "url": "https://github.com/janis-commerce/iac-api-builder.git"
   },
   "author": "Janis",
   "license": "ISC",
-  "homepage": "https:/github.com/janis-commerce/iac-api-builder.git#readme",
+  "homepage": "https://github.com/janis-commerce/iac-api-builder.git#readme",
   "devDependencies": {
     "husky": "^2.4.1",
     "eslint": "^5.16.0",
