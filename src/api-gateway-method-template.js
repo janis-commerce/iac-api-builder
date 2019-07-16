@@ -1,6 +1,6 @@
 'use strict';
 
-// IMPORTANTE: Mantener los espacios, nuevas líneas e indentación para no romper el formato yaml
+// IMPORTANT: Keep spaces, new lines and identation, otherwise could break yaml format
 
 const locations = {
 	path: 'path'
