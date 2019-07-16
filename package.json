@@ -1,8 +1,11 @@
 {
   "name": "@janiscommerce/iac-api-builder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Builds IaC API for AWS",
   "main": "index.js",
+  "bin": {
+    "iac-api-builder": "index.js"
+  },
   "scripts": {
     "test": "export TEST_ENV=true; mocha --exit -R nyan --recursive tests/",
     "test-ci": "nyc --reporter=html --reporter=text mocha --recursive tests/",
