@@ -102,13 +102,14 @@ describe('IacApiBuilder', () => {
 
 	const builder = new IacApiBuilder();
 	let fsMock;
+	let exit;
 
 	context('when API-Schemas file doesn\'t exist', () => {
 
 		before(() => {
 			sandbox.stub(console, 'log');
 			sandbox.stub(console, 'error');
-			sandbox.stub(process, 'exit');
+			exit = sandbox.stub(process, 'exit');
 			fsMock = sandbox.mock(fs);
 		});
 
@@ -131,6 +132,9 @@ describe('IacApiBuilder', () => {
 
 			await assert.doesNotReject(builder.build());
 
+			sandbox.assert.calledOnce(exit);
+			sandbox.assert.calledWith(exit, -1);
+
 			fsMock.verify();
 		});
 	});
@@ -143,7 +147,7 @@ describe('IacApiBuilder', () => {
 			beforeEach(() => {
 				sandbox.stub(console, 'log');
 				sandbox.stub(console, 'error');
-				sandbox.stub(process, 'exit');
+				exit = sandbox.stub(process, 'exit');
 
 				fsMock = sandbox.mock(fs);
 				builderMock = sandbox.mock(builder);
@@ -183,6 +187,9 @@ describe('IacApiBuilder', () => {
 
 				await builder.build();
 
+				sandbox.assert.calledOnce(exit);
+				sandbox.assert.calledWith(exit, -1);
+
 				fsMock.verify();
 				builderMock.verify();
 			});
@@ -215,6 +222,9 @@ describe('IacApiBuilder', () => {
 
 				await builder.build();
 
+				sandbox.assert.calledOnce(exit);
+				sandbox.assert.calledWith(exit, -1);
+
 				fsMock.verify();
 
 			});
@@ -224,7 +234,7 @@ describe('IacApiBuilder', () => {
 			beforeEach(() => {
 				sandbox.stub(console, 'log');
 				sandbox.stub(console, 'error');
-				sandbox.stub(process, 'exit');
+				exit = sandbox.stub(process, 'exit');
 
 				fsMock = sandbox.mock(fs);
 				builderMock = sandbox.mock(builder);
@@ -255,6 +265,9 @@ describe('IacApiBuilder', () => {
 				builderMock.expects('buildPath').never();
 
 				await builder.build();
+
+				sandbox.assert.calledOnce(exit);
+				sandbox.assert.calledWith(exit, -1);
 
 				fsMock.verify();
 				builderMock.verify();
@@ -289,6 +302,9 @@ describe('IacApiBuilder', () => {
 				builderMock.expects('buildPath').never();
 
 				await builder.build();
+
+				sandbox.assert.calledOnce(exit);
+				sandbox.assert.calledWith(exit, -1);
 
 				fsMock.verify();
 				builderMock.verify();
