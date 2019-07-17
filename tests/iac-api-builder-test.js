@@ -108,7 +108,7 @@ describe('IacApiBuilder', () => {
 		before(() => {
 			sandbox.stub(console, 'log');
 			sandbox.stub(console, 'error');
-
+			sandbox.stub(process, 'exit');
 			fsMock = sandbox.mock(fs);
 		});
 
@@ -143,6 +143,7 @@ describe('IacApiBuilder', () => {
 			beforeEach(() => {
 				sandbox.stub(console, 'log');
 				sandbox.stub(console, 'error');
+				sandbox.stub(process, 'exit');
 
 				fsMock = sandbox.mock(fs);
 				builderMock = sandbox.mock(builder);
@@ -223,6 +224,7 @@ describe('IacApiBuilder', () => {
 			beforeEach(() => {
 				sandbox.stub(console, 'log');
 				sandbox.stub(console, 'error');
+				sandbox.stub(process, 'exit');
 
 				fsMock = sandbox.mock(fs);
 				builderMock = sandbox.mock(builder);
