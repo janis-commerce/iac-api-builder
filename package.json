@@ -1,6 +1,6 @@
 {
   "name": "@janiscommerce/iac-api-builder",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Builds IaC API for AWS",
   "main": "index.js",
   "bin": {
